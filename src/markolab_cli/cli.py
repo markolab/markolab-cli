@@ -1,5 +1,5 @@
 import click
-# from markolab_cli.io import convert_raw_to_avi
+from markolab_cli.io import convert_raw_to_avi
 
 
 @click.group()
