@@ -3,11 +3,12 @@ import toml
 import numpy as np
 from tqdm.auto import tqdm
 from markovids.vid import io
+from typing import Optional
 
 
 def convert_raw_to_avi(
     input_filename: str,
-    output_filename: str,
+    output_filename: Optional[str] = None,
     chunk_size: int = 3000,
     delete: bool = False,
     threads: int = 8,
