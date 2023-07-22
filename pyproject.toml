@@ -3,10 +3,10 @@ requires = ["setuptools >= 61.0.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "markolab-cli"
+name = "markolab_cli"
 requires-python = ">=3.7"
 version = "0.0.1"
-description = "A package for processing 2d and 3d videos"
+description = "Markolab command line utilities"
 dependencies = [
 	"click"
 ]
