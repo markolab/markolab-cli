@@ -5,7 +5,7 @@ from tqdm.auto import tqdm
 from markovids.vid import io
 
 
-def convert_raw_to_avi(input_filename, output_filename, chunk_size, fps, delete, threads, codec):
+def convert_raw_to_avi(input_filename, output_filename, chunk_size, delete, threads, codec):
     base_filename = os.path.splitext(os.path.basename(input_filename))[0]
     tstamp_filename = f"{base_filename}.txt"
     metadata_filename = os.path.join(os.path.dirname(input_filename), "metadata.toml")

@@ -11,6 +11,9 @@ dependencies = [
 	"click"
 ]
 
+[project.scripts]
+markolab-cli = "markolab_cli.cli:cli"
+
 
 # [tool.setuptools.packages.find]
 # where = ["src"]
