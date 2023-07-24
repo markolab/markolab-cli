@@ -92,7 +92,7 @@ def create_slurm_batch_cli(
     else:
         base_command = ""
 
-    cluster_prefix = f'sbatch -n {ncpus:d} --mem={memory} -p {partition} -t {wall_time} -A  --wrap "'
+    cluster_prefix = f'sbatch -n {ncpus:d} --mem={memory} -p {partition} -t {wall_time} -A {account} --wrap "'
     issue_command = f"{cluster_prefix}{base_command}"
     for f in files_proc:
         run_command = f'{issue_command}{command} \"{f}\""'
