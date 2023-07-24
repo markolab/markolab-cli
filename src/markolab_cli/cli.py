@@ -69,7 +69,9 @@ def convert_dat_to_avi_cli_batch(chk_dir, file_filter, chunk_size, delete, threa
 )
 @click.argument("command", type=str)
 @click.option("-d", "--chk-dir", type=click.Path(), default=None, help="Directory to check")
-@click.option("-f", "--file-filter", type=str, default="*.dat", help="File filter", show_envvar=True)
+@click.option(
+    "-f", "--file-filter", type=str, default="*.dat", help="File filter", show_envvar=True
+)
 @click.option("--ncpus", "-n", type=int, default=2, help="Number of CPUs", show_envvar=True)
 @click.option("--memory", "-m", type=str, default="10GB", help="RAM string", show_envvar=True)
 @click.option("--wall-time", "-w", type=str, default="3:00:00", help="Wall time", show_envvar=True)
@@ -92,7 +94,7 @@ def create_slurm_batch_cli(
     else:
         base_command = ""
 
-    cluster_prefix = f'sbatch -n {ncpus:d} --mem={memory} -p {partition} -t {wall_time} -A {account} --wrap "'
+    cluster_prefix = f'sbatch --nodes 1 --ntasks-per-node 1 --cpus-per-task {ncpus:d} --mem={memory} -p {partition} -t {wall_time} -A {account} --wrap "'
     issue_command = f"{cluster_prefix}{base_command}"
     for f in files_proc:
         run_command = f'{issue_command}{command} \\"{f}\\""'
