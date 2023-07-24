@@ -50,6 +50,8 @@ def convert_dat_to_avi(
     frame_batches = [
         all_frames[idx : idx + chunk_size] for idx in range(0, input_obj.nframes, chunk_size)
     ]
+    # convert to ranges for faster reading/writing...
+    frame_batches = [range(batch[0], batch[-1]) for batch in frame_batches]
 
     if not os.path.exists(output_filename):
         output_obj = io.AviWriter(
@@ -71,19 +73,23 @@ def convert_dat_to_avi(
         print("Skipping encoding step, file exists...")
 
     new_input_obj = io.AutoReader(output_filename)
+    if new_input_obj.nframes != input_obj.nframes:
+        raise RuntimeError(
+            f"Original data has {input_obj.nframes} new file has {new_input_obj.nframes}"
+        )
 
     for batch in tqdm(frame_batches, desc="Checking data integrity"):
         raw_frames = input_obj.get_frames(batch)
         encoded_frames = new_input_obj.get_frames(batch)
 
-        if not np.array_equal(raw_frames, encoded_frames): # type: ignore
+        if not np.array_equal(raw_frames, encoded_frames):  # type: ignore
             raise RuntimeError(
                 "Raw frames and encoded frames not equal from {} to {}".format(batch[0], batch[-1])
             )
 
     input_obj.close()
     new_input_obj.close()
-    
+
     print("Encoding successful")
     if delete:
         print("Deleting {}".format(input_filename))
