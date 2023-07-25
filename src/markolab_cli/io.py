@@ -51,7 +51,7 @@ def convert_dat_to_avi(
         all_frames[idx : idx + chunk_size] for idx in range(0, input_obj.nframes, chunk_size)
     ]
     # convert to ranges for faster reading/writing...
-    frame_batches = [range(batch[0], batch[-1]) for batch in frame_batches]
+    frame_batches = [range(batch[0], batch[-1] + 1) for batch in frame_batches]
 
     if not os.path.exists(output_filename):
         output_obj = io.AviWriter(
