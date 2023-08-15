@@ -9,7 +9,8 @@ version = "0.0.1"
 description = "Markolab command line utilities"
 dependencies = [
 	"click",
-	"tqdm"
+	"tqdm",
+	"markovids@git+https://github.com/markolab/markovids.git"
 ]
 
 [project.scripts]
