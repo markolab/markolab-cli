@@ -23,6 +23,20 @@ def convert_params(func):
     return wrapper
 
 
+def slurm_params(func):
+    @click.option("--ncpus", "-n", type=int, default=2, help="Number of CPUs", show_envvar=True)
+    @click.option("--memory", "-m", type=str, default="10GB", help="RAM string", show_envvar=True)
+    @click.option("--wall-time", "-w", type=str, default="3:00:00", help="Wall time", show_envvar=True)
+    @click.option("--partition", type=str, default="short", help="Partition name", show_envvar=True)
+    @click.option("--prefix", type=str, default=None, help="Command prefix", show_envvar=True)
+    @click.option("--account", type=str, default=None, help="Account name", show_envvar=True)
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
 @cli.command(name="convert-dat-to-avi", context_settings={"show_default": True})
 @click.argument("input-filename", type=click.Path(exists=True, resolve_path=True))
 @click.option(
@@ -72,12 +86,7 @@ def convert_dat_to_avi_cli_batch(chk_dir, file_filter, chunk_size, delete, threa
 @click.option(
     "-f", "--file-filter", type=str, default="*.dat", help="File filter", show_envvar=True
 )
-@click.option("--ncpus", "-n", type=int, default=2, help="Number of CPUs", show_envvar=True)
-@click.option("--memory", "-m", type=str, default="10GB", help="RAM string", show_envvar=True)
-@click.option("--wall-time", "-w", type=str, default="3:00:00", help="Wall time", show_envvar=True)
-@click.option("--partition", type=str, default="short", help="Partition name", show_envvar=True)
-@click.option("--prefix", type=str, default=None, help="Command prefix", show_envvar=True)
-@click.option("--account", type=str, default=None, help="Account name", show_envvar=True)
+@slurm_params
 def create_slurm_batch_cli(
     command, chk_dir, file_filter, ncpus, memory, wall_time, partition, prefix, account
 ):
@@ -99,6 +108,28 @@ def create_slurm_batch_cli(
     for f in files_proc:
         run_command = f'{issue_command}{command} \\"{f}\\""'
         print(run_command)
+
+
+
+
+@cli.command(
+    name="create-slurm",
+    context_settings={"show_default": True, "auto_envvar_prefix": "MARKOLABCLI_SLURM"},
+)
+@click.argument("command", type=str)
+@slurm_params
+def create_slurm_cli(
+    command, ncpus, memory, wall_time, partition, prefix, account
+):
+    
+    if prefix is not None:
+        base_command = f"{prefix};"
+    else:
+        base_command = ""
+
+    cluster_prefix = f'sbatch --nodes 1 --ntasks-per-node 1 --cpus-per-task {ncpus:d} --mem={memory} -p {partition} -t {wall_time} -A {account} --wrap "'
+    issue_command = f"{cluster_prefix}{base_command}"
+    print(issue_command)
 
 
 if __name__ == "__main__":
