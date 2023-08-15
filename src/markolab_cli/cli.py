@@ -27,7 +27,7 @@ def slurm_params(func):
     @click.option("--ncpus", "-n", type=int, default=2, help="Number of CPUs", show_envvar=True)
     @click.option("--memory", "-m", type=str, default="10GB", help="RAM string", show_envvar=True)
     @click.option("--wall-time", "-w", type=str, default="3:00:00", help="Wall time", show_envvar=True)
-    @click.option("--partition", type=str, default="short", help="Partition name", show_envvar=True)
+    @click.option("--qos", type=str, default="inferno", help="QOS name", show_envvar=True)
     @click.option("--prefix", type=str, default=None, help="Command prefix", show_envvar=True)
     @click.option("--account", type=str, default=None, help="Account name", show_envvar=True)
     @functools.wraps(func)
@@ -88,7 +88,7 @@ def convert_dat_to_avi_cli_batch(chk_dir, file_filter, chunk_size, delete, threa
 )
 @slurm_params
 def create_slurm_batch_cli(
-    command, chk_dir, file_filter, ncpus, memory, wall_time, partition, prefix, account
+    command, chk_dir, file_filter, ncpus, memory, wall_time, qos, prefix, account
 ):
     import os
     import glob
@@ -103,7 +103,7 @@ def create_slurm_batch_cli(
     else:
         base_command = ""
 
-    cluster_prefix = f'sbatch --nodes 1 --ntasks-per-node 1 --cpus-per-task {ncpus:d} --mem={memory} -p {partition} -t {wall_time} -A {account} --wrap "'
+    cluster_prefix = f'sbatch --nodes 1 --ntasks-per-node 1 --cpus-per-task {ncpus:d} --mem={memory} -q {qos} -t {wall_time} -A {account} --wrap "'
     issue_command = f"{cluster_prefix}{base_command}"
     for f in files_proc:
         run_command = f'{issue_command}{command} \\"{f}\\""'
@@ -119,7 +119,7 @@ def create_slurm_batch_cli(
 @click.argument("command", type=str)
 @slurm_params
 def create_slurm_cli(
-    command, ncpus, memory, wall_time, partition, prefix, account
+    command, ncpus, memory, wall_time, qos, prefix, account
 ):
     
     if prefix is not None:
@@ -127,7 +127,7 @@ def create_slurm_cli(
     else:
         base_command = ""
 
-    cluster_prefix = f'sbatch --nodes 1 --ntasks-per-node 1 --cpus-per-task {ncpus:d} --mem={memory} -p {partition} -t {wall_time} -A {account} --wrap "'
+    cluster_prefix = f'sbatch --nodes 1 --ntasks-per-node 1 --cpus-per-task {ncpus:d} --mem={memory} -q {qos} -t {wall_time} -A {account} --wrap "'
     issue_command = f"{cluster_prefix}{base_command}"
     print(issue_command)
 
