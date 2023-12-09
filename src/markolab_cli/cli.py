@@ -83,6 +83,7 @@ def slurm_params(func):
         envvar="MARKOLABCLI_SLURM_NGPUS",
         show_envvar=True,
     )
+    @click.option("--gpu-type", type=str, default=None, help="GPU type (e.g. A100, V100)", envvar="MARKOLABCLI_SLURM_GPUTYPE", show_envvar=True)
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         return func(*args, **kwargs)
@@ -144,7 +145,11 @@ def convert_dat_to_avi_cli_batch(chk_dir, file_filter, chunk_size, delete, threa
 )
 @slurm_params
 def create_slurm_batch_cli(
+<<<<<<< HEAD
     command, chk_dir, file_filter, is_dir, ncpus, memory, wall_time, qos, prefix, account, ngpus
+=======
+    command, chk_dir, file_filter, ncpus, memory, wall_time, qos, prefix, account, ngpus, gpu_type
+>>>>>>> 5d0a896688fc786c4174f5a83f85bf733a6884fc
 ):
     import os
     import glob
@@ -162,7 +167,12 @@ def create_slurm_batch_cli(
     else:
         base_command = ""
 
-    cluster_prefix = f'sbatch --gres=gpu:{ngpus} --nodes 1 --ntasks-per-node 1 --cpus-per-task {ncpus:d} --mem={memory} -q {qos} -t {wall_time} -A {account} --wrap "'
+    if gpu_type is not None:
+        gpu_cmd = f"{gpu_type}:{ngpus}"
+    else:
+        gpu_cmd = f"{ngpus}"
+
+    cluster_prefix = f'sbatch --gpu-per-node={gpu_cmd} --nodes 1 --ntasks-per-node 1 --cpus-per-task {ncpus:d} --mem={memory} -q {qos} -t {wall_time} -A {account} --wrap "'
     issue_command = f"{cluster_prefix}{base_command}"
     for f in files_proc:
         run_command = f'{issue_command}{command} \\"{f}\\""'
