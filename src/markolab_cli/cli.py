@@ -24,13 +24,65 @@ def convert_params(func):
 
 
 def slurm_params(func):
-    @click.option("--ncpus", "-n", type=int, default=2, help="Number of CPUs", show_envvar=True)
-    @click.option("--memory", "-m", type=str, default="10GB", help="RAM string", show_envvar=True)
-    @click.option("--wall-time", "-w", type=str, default="3:00:00", help="Wall time", show_envvar=True)
-    @click.option("--qos", type=str, default="inferno", help="QOS name", show_envvar=True)
-    @click.option("--prefix", type=str, default=None, help="Command prefix", show_envvar=True)
-    @click.option("--account", type=str, default=None, help="Account name", show_envvar=True)
-    @click.option("--ngpus", type=int, default=0, help="Number of GPUs to include in request", show_envvar=True)
+    @click.option(
+        "--ncpus",
+        "-n",
+        type=int,
+        default=2,
+        help="Number of CPUs",
+        envvar="MARKOLABCLI_SLURM_NCPUS",
+        show_envvar=True,
+    )
+    @click.option(
+        "--memory",
+        "-m",
+        type=str,
+        default="10GB",
+        help="RAM string",
+        envvar="MARKOLABCLI_SLURM_MEM",
+        show_envvar=True,
+    )
+    @click.option(
+        "--wall-time",
+        "-w",
+        type=str,
+        default="3:00:00",
+        help="Wall time",
+        envvar="MARKOLABCLI_SLURM_WALLTIME",
+        show_envvar=True,
+    )
+    @click.option(
+        "--qos",
+        type=str,
+        default="inferno",
+        help="QOS name",
+        envvar="MARKOLABCLI_SLURM_QOS",
+        show_envvar=True,
+    )
+    @click.option(
+        "--prefix",
+        type=str,
+        default=None,
+        help="Command prefix",
+        envvar="MARKOLABCLI_SLURM_PREFIX",
+        show_envvar=True,
+    )
+    @click.option(
+        "--account",
+        type=str,
+        default=None,
+        help="Account name",
+        envvar="MARKOLABCLI_SLURM_ACCOUNT",
+        show_envvar=True,
+    )
+    @click.option(
+        "--ngpus",
+        type=int,
+        default=0,
+        help="Number of GPUs to include in request",
+        envvar="MARKOLABCLI_SLURM_NGPUS",
+        show_envvar=True,
+    )
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         return func(*args, **kwargs)
@@ -87,9 +139,12 @@ def convert_dat_to_avi_cli_batch(chk_dir, file_filter, chunk_size, delete, threa
 @click.option(
     "-f", "--file-filter", type=str, default="*.dat", help="File filter", show_envvar=True
 )
+@click.option(
+    "--is-dir", is_flag=True
+)
 @slurm_params
 def create_slurm_batch_cli(
-    command, chk_dir, file_filter, ncpus, memory, wall_time, qos, prefix, account, ngpus
+    command, chk_dir, file_filter, is_dir, ncpus, memory, wall_time, qos, prefix, account, ngpus
 ):
     import os
     import glob
@@ -97,7 +152,10 @@ def create_slurm_batch_cli(
     if chk_dir is None:
         chk_dir = os.getcwd()
 
-    files_proc = glob.glob(os.path.join(chk_dir, "**", file_filter), recursive=True)
+    files_proc = sorted(glob.glob(os.path.join(chk_dir, "**", file_filter), recursive=True))
+
+    if is_dir:
+        files_proc = filter(os.path.isdir, files_proc)
 
     if prefix is not None:
         base_command = f"{prefix};"
@@ -111,18 +169,13 @@ def create_slurm_batch_cli(
         print(run_command)
 
 
-
-
 @cli.command(
     name="create-slurm",
     context_settings={"show_default": True, "auto_envvar_prefix": "MARKOLABCLI_SLURM"},
 )
 @click.argument("command", type=str)
 @slurm_params
-def create_slurm_cli(
-    command, ncpus, memory, wall_time, qos, prefix, account, ngpus
-):
-    
+def create_slurm_cli(command, ncpus, memory, wall_time, qos, prefix, account, ngpus):
     if prefix is not None:
         base_command = f"{prefix};"
     else:
@@ -130,7 +183,8 @@ def create_slurm_cli(
 
     cluster_prefix = f'sbatch --gres=gpu:{ngpus} --nodes 1 --ntasks-per-node 1 --cpus-per-task {ncpus:d} --mem={memory} -q {qos} -t {wall_time} -A {account} --wrap "'
     issue_command = f"{cluster_prefix}{base_command}"
-    print(issue_command)
+    run_command = f'{issue_command}{command}"'
+    print(run_command)
 
 
 if __name__ == "__main__":
