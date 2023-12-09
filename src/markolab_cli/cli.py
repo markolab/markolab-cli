@@ -145,11 +145,7 @@ def convert_dat_to_avi_cli_batch(chk_dir, file_filter, chunk_size, delete, threa
 )
 @slurm_params
 def create_slurm_batch_cli(
-<<<<<<< HEAD
-    command, chk_dir, file_filter, is_dir, ncpus, memory, wall_time, qos, prefix, account, ngpus
-=======
-    command, chk_dir, file_filter, ncpus, memory, wall_time, qos, prefix, account, ngpus, gpu_type
->>>>>>> 5d0a896688fc786c4174f5a83f85bf733a6884fc
+    command, chk_dir, file_filter, is_dir, ncpus, memory, wall_time, qos, prefix, account, ngpus, gpu_type
 ):
     import os
     import glob
