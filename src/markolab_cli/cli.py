@@ -168,7 +168,7 @@ def create_slurm_batch_cli(
     else:
         gpu_cmd = f"{ngpus}"
 
-    cluster_prefix = f'sbatch --gpu-per-node={gpu_cmd} --nodes 1 --ntasks-per-node 1 --cpus-per-task {ncpus:d} --mem={memory} -q {qos} -t {wall_time} -A {account} --wrap "'
+    cluster_prefix = f'sbatch --gpus-per-node={gpu_cmd} --nodes 1 --ntasks-per-node 1 --cpus-per-task {ncpus:d} --mem={memory} -q {qos} -t {wall_time} -A {account} --wrap "'
     issue_command = f"{cluster_prefix}{base_command}"
     for f in files_proc:
         run_command = f'{issue_command}{command} \\"{f}\\""'
@@ -181,13 +181,18 @@ def create_slurm_batch_cli(
 )
 @click.argument("command", type=str)
 @slurm_params
-def create_slurm_cli(command, ncpus, memory, wall_time, qos, prefix, account, ngpus):
+def create_slurm_cli(command, ncpus, memory, wall_time, qos, prefix, account, ngpus, gpu_type):
     if prefix is not None:
         base_command = f"{prefix};"
     else:
         base_command = ""
 
-    cluster_prefix = f'sbatch --gres=gpu:{ngpus} --nodes 1 --ntasks-per-node 1 --cpus-per-task {ncpus:d} --mem={memory} -q {qos} -t {wall_time} -A {account} --wrap "'
+    if gpu_type is not None:
+        gpu_cmd = f"{gpu_type}:{ngpus}"
+    else:
+        gpu_cmd = f"{ngpus}"
+
+    cluster_prefix = f'sbatch --gpus-per-node={gpu_cmd} --nodes 1 --ntasks-per-node 1 --cpus-per-task {ncpus:d} --mem={memory} -q {qos} -t {wall_time} -A {account} --wrap "'
     issue_command = f"{cluster_prefix}{base_command}"
     run_command = f'{issue_command}{command}"'
     print(run_command)
