@@ -1,7 +1,6 @@
 import click
 import functools
 from tqdm.auto import tqdm
-from markolab_cli.io import convert_dat_to_avi
 
 
 @click.group()
@@ -49,6 +48,7 @@ def slurm_params(func):
 # fmt: on
 @convert_params
 def convert_dat_to_avi_cli(input_filename, output_filename, chunk_size, delete, threads, codec):
+    from markolab_cli.io import convert_dat_to_avi
     convert_dat_to_avi(
         input_filename=input_filename,
         output_filename=output_filename,
@@ -68,6 +68,7 @@ def convert_dat_to_avi_cli(input_filename, output_filename, chunk_size, delete, 
 def convert_dat_to_avi_cli_batch(chk_dir, file_filter, chunk_size, delete, threads, codec):
     import os
     import glob
+    from markolab_cli.io import convert_dat_to_avi
 
     if chk_dir is None:
         chk_dir = os.getcwd()
