@@ -128,7 +128,7 @@ def create_slurm_batch_cli(
 
     if constraint is not None:
         for _constraint in constraint:
-            cluster_prefix += f"--constraint={_constraint} "
+            cluster_prefix += f'--constraint="{_constraint}" '
 
     cluster_prefix += '--wrap "'
 
