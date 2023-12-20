@@ -118,7 +118,7 @@ def create_slurm_batch_cli(
         gpu_cmd = f"{ngpus}"
     
 
-    cluster_prefix = f'sbatch --gpus-per-node={gpu_cmd} --nodes 1 --ntasks-per-node 1 --cpus-per-task {ncpus:d} --mem={memory} -q {qos} -t {wall_time} -A {account}'
+    cluster_prefix = f'sbatch --gpus-per-node={gpu_cmd} --nodes 1 --ntasks-per-node 1 --cpus-per-task {ncpus:d} --mem={memory} -q {qos} -t {wall_time} -A {account} '
     
     try:
         iter(constraint)
@@ -154,7 +154,7 @@ def create_slurm_cli(command, ncpus, memory, wall_time, qos, prefix, account, ng
     else:
         gpu_cmd = f"{ngpus}"
 
-    cluster_prefix = f'sbatch --gpus-per-node={gpu_cmd} --nodes 1 --ntasks-per-node 1 --cpus-per-task {ncpus:d} --mem={memory} -q {qos} -t {wall_time} -A {account}'
+    cluster_prefix = f'sbatch --gpus-per-node={gpu_cmd} --nodes 1 --ntasks-per-node 1 --cpus-per-task {ncpus:d} --mem={memory} -q {qos} -t {wall_time} -A {account} '
 
     try:
         iter(constraint)
@@ -164,7 +164,7 @@ def create_slurm_cli(command, ncpus, memory, wall_time, qos, prefix, account, ng
 
     if constraint is not None:
         for _constraint in constraint:
-            cluster_prefix += f"--constraint={_constraint} "
+            cluster_prefix += f'--constraint="{_constraint}" '
 
     cluster_prefix += '--wrap "'
 
