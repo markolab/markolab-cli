@@ -161,7 +161,7 @@ def create_slurm_cli(command, ncpus, memory, wall_time, qos, prefix, account, ng
 
     if constraint is not None:
         for _constraint in constraint:
-            cluster_prefix += f" --constraint={_constraint}"
+            cluster_prefix += f" --constraint={_constraint} "
 
     issue_command = f"{cluster_prefix}{base_command}"
     run_command = f'{issue_command}{command}"'
