@@ -29,6 +29,7 @@ def slurm_params(func):
     @click.option( "--wall-time", "-w", type=str, default="3:00:00", help="Wall time", envvar="MARKOLABCLI_SLURM_WALLTIME", show_envvar=True, )
     @click.option( "--qos", type=str, default="inferno", help="QOS name", envvar="MARKOLABCLI_SLURM_QOS", show_envvar=True, )
     @click.option( "--prefix", type=str, default=None, help="Command prefix", envvar="MARKOLABCLI_SLURM_PREFIX", show_envvar=True, )
+    @click.option( "--suffix", type=str, default=None, help="Command suffix", envvar="MARKOLABCLI_SLURM_SUFFIX", show_envvar=True, )
     @click.option( "--account", type=str, default=None, help="Account name", envvar="MARKOLABCLI_SLURM_ACCOUNT", show_envvar=True, )
     @click.option( "--ngpus", type=int, default=0, help="Number of GPUs to include in request", envvar="MARKOLABCLI_SLURM_NGPUS", show_envvar=True, )
     @click.option("--gpu-type", type=str, default=None, help="GPU type (e.g. A100, V100)", envvar="MARKOLABCLI_SLURM_GPUTYPE", show_envvar=True)
@@ -94,7 +95,7 @@ def convert_dat_to_avi_cli_batch(chk_dir, file_filter, chunk_size, delete, threa
 # fmt: on
 @slurm_params
 def create_slurm_batch_cli(
-    command, chk_dir, file_filter, is_dir, ncpus, memory, wall_time, qos, prefix, account, ngpus, gpu_type, constraint
+    command, chk_dir, file_filter, is_dir, ncpus, memory, wall_time, qos, prefix, suffix, account, ngpus, gpu_type, constraint
 ):
     import os
     import glob
@@ -134,7 +135,7 @@ def create_slurm_batch_cli(
 
     issue_command = f"{cluster_prefix}{base_command}"
     for f in files_proc:
-        run_command = f'{issue_command}{command} \\"{f}\\""'
+        run_command = f'{issue_command}{command} \\"{f}\\" {suffix}"'
         print(run_command)
 
 
@@ -143,7 +144,7 @@ def create_slurm_batch_cli(
 @click.argument("command", type=str)
 # fmt: on
 @slurm_params
-def create_slurm_cli(command, ncpus, memory, wall_time, qos, prefix, account, ngpus, gpu_type, constraint):
+def create_slurm_cli(command, ncpus, memory, wall_time, qos, prefix, suffix, account, ngpus, gpu_type, constraint):
     if prefix is not None:
         base_command = f"{prefix};"
     else:
@@ -169,7 +170,7 @@ def create_slurm_cli(command, ncpus, memory, wall_time, qos, prefix, account, ng
     cluster_prefix += '--wrap "'
 
     issue_command = f"{cluster_prefix}{base_command}"
-    run_command = f'{issue_command}{command}"'
+    run_command = f'{issue_command}{command}{suffix}"'
     print(run_command)
 
 
