@@ -135,7 +135,10 @@ def create_slurm_batch_cli(
 
     issue_command = f"{cluster_prefix}{base_command}"
     for f in files_proc:
-        run_command = f'{issue_command}{command} \\"{f}\\" {suffix}"'
+        if suffix is not None:
+            run_command = f'{issue_command}{command} \\"{f}\\" {suffix}"'
+        else:
+            run_command = f'{issue_command}{command} \\"{f}\\""'
         print(run_command)
 
 
@@ -170,7 +173,10 @@ def create_slurm_cli(command, ncpus, memory, wall_time, qos, prefix, suffix, acc
     cluster_prefix += '--wrap "'
 
     issue_command = f"{cluster_prefix}{base_command}"
-    run_command = f'{issue_command}{command}{suffix}"'
+    if suffix is not None:
+        run_command = f'{issue_command}{command}{suffix}"'
+    else:
+        run_command = f'{issue_command}{command}"'
     print(run_command)
 
 
