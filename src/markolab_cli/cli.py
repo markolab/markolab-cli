@@ -45,10 +45,11 @@ def slurm_params(func):
 # fmt: off
 @cli.command(name="convert-dat-to-avi", context_settings={"show_default": True})
 @click.argument("input-filename", type=click.Path(exists=True, resolve_path=True))
-@click.option( "-o", "--output-filename", type=click.Path(), default=None, help="Path to output file" )
+@click.option("-o", "--output-filename", type=click.Path(), default=None, help="Path to output file" )
+@click.option("--force", type=bool, is_flag=True)
 # fmt: on
 @convert_params
-def convert_dat_to_avi_cli(input_filename, output_filename, chunk_size, delete, threads, codec):
+def convert_dat_to_avi_cli(input_filename, output_filename, force, chunk_size, delete, threads, codec):
     from markolab_cli.io import convert_dat_to_avi
     convert_dat_to_avi(
         input_filename=input_filename,
@@ -57,6 +58,7 @@ def convert_dat_to_avi_cli(input_filename, output_filename, chunk_size, delete, 
         delete=delete,
         threads=threads,
         codec=codec,
+        force=force
     )
 
 

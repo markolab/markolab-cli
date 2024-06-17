@@ -13,6 +13,7 @@ def convert_dat_to_avi(
     delete: bool = False,
     threads: int = 8,
     codec: str = "ffv1",
+    force: bool = False,
 ) -> None:
     base_filename = os.path.splitext(input_filename)[0]
     camera_name = os.path.basename(base_filename)
@@ -53,7 +54,7 @@ def convert_dat_to_avi(
     # convert to ranges for faster reading/writing...
     frame_batches = [range(batch[0], batch[-1] + 1) for batch in frame_batches]
 
-    if not os.path.exists(output_filename):
+    if not os.path.exists(output_filename) or force:
         output_obj = io.AviWriter(
             filepath=output_filename,
             frame_size=frame_size,
