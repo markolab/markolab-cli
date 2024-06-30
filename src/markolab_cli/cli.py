@@ -1,5 +1,6 @@
 import click
 import functools
+from copy import deepcopy
 from tqdm.auto import tqdm
 
 
@@ -92,7 +93,7 @@ def convert_dat_to_avi_cli_batch(chk_dir, file_filter, chunk_size, delete, threa
 @cli.command( name="create-slurm-batch", context_settings={"show_default": True, "auto_envvar_prefix": "MARKOLABCLI_BATCH"}, )
 @click.argument("command", type=str)
 @click.option("-d", "--chk-dir", type=click.Path(), default=None, help="Directory to check")
-@click.option( "-f", "--file-filter", type=str, default="*.dat", help="File filter", show_envvar=True )
+@click.option("-f", "--file-filter", type=str, default="*.dat", help="File filter", show_envvar=True )
 @click.option( "--is-dir", is_flag=True )
 # fmt: on
 @slurm_params
@@ -137,8 +138,13 @@ def create_slurm_batch_cli(
 
     issue_command = f"{cluster_prefix}{base_command}"
     for f in files_proc:
-        if suffix is not None:
-            run_command = f'{issue_command}{command} \\"{f}\\" {suffix}"'
+        if (suffix is not None) and ("@BASE" in suffix):
+            # BASE is in suffix strip out and replace with basename...
+            use_suffix = deepcopy(suffix)
+            use_suffix.replace("@BASE", os.path.splitext(f)[0]) # if we want to do something with the filename...
+            run_command = f'{issue_command}{command} \\"{f}\\" {use_suffix}"'
+        elif suffix is not None:
+            run_command = f'{issue_command}{command} \\"{f}\\" {use_suffix}"'
         else:
             run_command = f'{issue_command}{command} \\"{f}\\""'
         print(run_command)
