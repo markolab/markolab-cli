@@ -138,10 +138,11 @@ def create_slurm_batch_cli(
 
     issue_command = f"{cluster_prefix}{base_command}"
     for f in files_proc:
-        if (suffix is not None) and ("@BASE" in suffix):
+        if (suffix is not None) and ("@base" in suffix.lower()):
             # BASE is in suffix strip out and replace with basename...
             use_suffix = deepcopy(suffix)
-            use_suffix.replace("@BASE", os.path.splitext(f)[0]) # if we want to do something with the filename...
+            use_suffix = use_suffix.replace("@BASE", os.path.splitext(f)[0]) # if we want to do something with the filename...
+            use_suffix = use_suffix.replace("@base", os.path.splitext(f)[0]) # if we want to do something with the filename...
             run_command = f'{issue_command}{command} \\"{f}\\" {use_suffix}"'
         elif suffix is not None:
             run_command = f'{issue_command}{command} \\"{f}\\" {use_suffix}"'
