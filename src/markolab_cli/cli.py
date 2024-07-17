@@ -232,13 +232,15 @@ def create_sleap_resume_cmd(job_id, no_checkpoint, update_lr):
                     if _tmp is not None:
                         learning_rate = float(_tmp.group(1))    
         print(f"Found final learning rate: {learning_rate}")
+    elif update_lr:
+        raise RuntimeError(f"Did not find logfile {logfile}")
 
     if update_lr and (learning_rate is not None):
         config["optimization"]["initial_learning_rate"] = learning_rate
         with open(json_file, "w") as f:
             json.dump(config, f, indent=4, sort_keys=False)
     elif update_lr:
-        raise RuntimeError(f"Did not find logfile {logfile}")
+        raise RuntimeError(f"Learning rate not parsed from {logfile}")
 
 if __name__ == "__main__":
     cli()
