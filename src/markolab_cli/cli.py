@@ -231,7 +231,7 @@ def create_sleap_resume_cmd(job_id, no_checkpoint, update_lr):
                     _tmp = re.search("to (.*?)\.$", _line)
                     if _tmp is not None:
                         learning_rate = float(_tmp.group(1))    
-        print(f"Found final learning rate: {learning_rate}")
+        # print(f"Found final learning rate: {learning_rate}")
     elif update_lr:
         raise RuntimeError(f"Did not find logfile {logfile}")
 
