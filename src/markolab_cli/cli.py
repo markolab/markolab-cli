@@ -204,7 +204,7 @@ def create_sleap_resume_cmd(job_id):
     json_file = match.group(1)
 
     with open(json_file, "r") as f:
-        config = json.load(json_file)
+        config = json.load(f)
 
     config_output = config["outputs"]
     run_name = config_output["run_name_prefix"] + config_output["run_name"] + config_output["run_name_suffix"]
