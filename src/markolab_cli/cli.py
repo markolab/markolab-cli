@@ -189,5 +189,30 @@ def create_slurm_cli(command, ncpus, memory, wall_time, qos, prefix, suffix, acc
     print(run_command)
 
 
+# fmt: off
+@cli.command( name="create-sleap-resume-cmd")
+@click.argument("job_id", type=int)
+def create_sleap_resume_cmd(job_id):
+    import json
+    import re
+    import os
+    import subprocess
+
+    cmd_output = subprocess.check_output(f"sacct -B -j {job_id}", shell=True)
+    sbatch_script = cmd_output.decode().splitlines()[5]
+    match = re.search("sleap\-train \"(.*?)\"", sbatch_script)
+    json_file = match.group(1)
+
+    with open(json_file, "r") as f:
+        config = json.load(json_file)
+
+    config_output = config["outputs"]
+    run_name = config_output["run_name_prefix"] + config_output["run_name"] + config_output["run_name_suffix"]
+    model_filename = os.path.join(config_output["runs_folder"], run_name)
+
+    # strip out only the sbatch stuff...
+    new_sbatch_script = sbatch_script + f' --base_checkpoint "{model_filename}"'
+    print(new_sbatch_script)
+
 if __name__ == "__main__":
     cli()
