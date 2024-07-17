@@ -192,7 +192,8 @@ def create_slurm_cli(command, ncpus, memory, wall_time, qos, prefix, suffix, acc
 # fmt: off
 @cli.command( name="create-sleap-resume-cmd")
 @click.argument("job_id", type=int)
-def create_sleap_resume_cmd(job_id):
+@click.option("--no-checkpoint", "-n", type=bool, is_flag=True)
+def create_sleap_resume_cmd(job_id, no_checkpoint):
     import json
     import re
     import os
@@ -211,7 +212,10 @@ def create_sleap_resume_cmd(job_id):
     model_filename = os.path.join(config_output["runs_folder"], run_name)
 
     # strip out only the sbatch stuff...
-    new_sbatch_script = sbatch_script + f' --base_checkpoint "{model_filename}"'
+    if not no_checkpoint:
+        new_sbatch_script = sbatch_script + f' --base_checkpoint "{model_filename}"'
+    else:
+        new_sbatch_script = sbatch_script
     print(new_sbatch_script)
 
 if __name__ == "__main__":
