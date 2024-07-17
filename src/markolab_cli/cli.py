@@ -192,8 +192,9 @@ def create_slurm_cli(command, ncpus, memory, wall_time, qos, prefix, suffix, acc
 # fmt: off
 @cli.command( name="create-sleap-resume-cmd")
 @click.argument("job_id", type=int)
-@click.option("--no-checkpoint", "-n", type=bool, is_flag=True)
-def create_sleap_resume_cmd(job_id, no_checkpoint):
+@click.option("--no-checkpoint", "-n", type=bool, is_flag=True, help="Skip adding base_checkpoint option")
+@click.option("--update-lr", "-u", type=bool, is_flag=True, help="Update json config with latest learning rate")
+def create_sleap_resume_cmd(job_id, no_checkpoint, update_lr):
     import json
     import re
     import os
@@ -217,6 +218,27 @@ def create_sleap_resume_cmd(job_id, no_checkpoint):
     else:
         new_sbatch_script = sbatch_script
     print(new_sbatch_script)
+
+    learning_rate = None
+
+    logfile = f"slurm-{job_id}.out"
+    if os.path.exists(logfile):
+        with open(logfile, "r") as f:
+            lines = f.readlines()
+
+        for _line in lines:
+                if "learning rate" in _line.lower():
+                    _tmp = re.search("to (.*?)\.$", _line)
+                    if _tmp is not None:
+                        learning_rate = float(_tmp.group(1))    
+        print(f"Found final learning rate: {learning_rate}")
+
+    if update_lr and (learning_rate is not None):
+        config["optimization"]["initial_learning_rate"] = learning_rate
+        with open(json_file, "w") as f:
+            json.dump(config, f, indent=4, sort_keys=False)
+    elif update_lr:
+        raise RuntimeError(f"Did not find logfile {logfile}")
 
 if __name__ == "__main__":
     cli()
