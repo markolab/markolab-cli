@@ -1,10 +1,4 @@
-import os
-import toml
-import numpy as np
-from tqdm.auto import tqdm
-from markovids.vid import io
 from typing import Optional
-
 
 def convert_dat_to_avi(
     input_filename: str,
@@ -15,6 +9,13 @@ def convert_dat_to_avi(
     codec: str = "ffv1",
     force: bool = False,
 ) -> None:
+    
+    import os
+    import toml
+    import numpy as np
+    from tqdm.auto import tqdm
+    from markovids.vid import io
+    
     base_filename = os.path.splitext(input_filename)[0]
     camera_name = os.path.basename(base_filename)
     tstamp_filename = f"{base_filename}.txt"
