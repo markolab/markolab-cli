@@ -252,7 +252,7 @@ def _create_sleap_resume_cmd(job_id, no_checkpoint, update_lr):
 # 1. batch this out, call grep to find jobs that timed out...
 # fmt: off
 @cli.command( name="create-sleap-resume-batch")
-@click.options("--file-filter", "-f", default="slurm*.out", type=str)
+@click.option("--file-filter", "-f", default="slurm*.out", type=str)
 @click.option("--pattern", "-p", default="TIMEOUT", type=str)
 @click.option("-d", "--chk-dir", type=click.Path(), default=None, help="Directory to check")
 @click.option("--no-checkpoint", "-n", type=bool, is_flag=True, help="Skip adding base_checkpoint option")
