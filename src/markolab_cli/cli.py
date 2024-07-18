@@ -277,7 +277,7 @@ def create_sleap_resume_batch(file_filter, pattern, chk_dir, no_checkpoint, upda
                     break
 
     for _file in batch_files:
-        job_id = int(re.search(r"\-([0-9]*)\.out", _file).group(1))
+        job_id = int(re.search(r".*\-([0-9]+)\.out$", _file).group(1))
         _create_sleap_resume_cmd(job_id, no_checkpoint, update_lr)
 
 
