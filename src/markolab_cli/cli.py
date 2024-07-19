@@ -193,13 +193,13 @@ def create_slurm_cli(command, ncpus, memory, wall_time, qos, prefix, suffix, acc
 # fmt: off
 @cli.command( name="create-sleap-resume-cmd")
 @click.argument("job_id", type=int)
-@click.option("--no-checkpoint", "-n", type=bool, is_flag=True, help="Skip adding base_checkpoint option")
+# @click.option("--no-checkpoint", "-n", type=bool, is_flag=True, help="Skip adding base_checkpoint option")
 @click.option("--update-lr", "-u", type=bool, is_flag=True, help="Update json config with latest learning rate")
-def create_sleap_resume_cmd(job_id, no_checkpoint, update_lr):
-    return _create_sleap_resume_cmd(job_id, no_checkpoint, update_lr)
+def create_sleap_resume_cmd(job_id, update_lr):
+    return _create_sleap_resume_cmd(job_id, update_lr)
 
 
-def _create_sleap_resume_cmd(job_id, no_checkpoint, update_lr):
+def _create_sleap_resume_cmd(job_id, update_lr):
     import json
     import re
     import os
@@ -218,12 +218,12 @@ def _create_sleap_resume_cmd(job_id, no_checkpoint, update_lr):
     model_filename = os.path.join(config_output["runs_folder"], run_name)
 
     # strip out only the sbatch stuff...
-    if not no_checkpoint:
+    if "base_checkpoint" not in sbatch_script:
         new_sbatch_script = sbatch_script + f' --base_checkpoint "{model_filename}"'
     else:
         new_sbatch_script = sbatch_script
+    
     print(new_sbatch_script)
-
     learning_rate = None
 
     logfile = f"slurm-{job_id}.out"
@@ -249,15 +249,14 @@ def _create_sleap_resume_cmd(job_id, no_checkpoint, update_lr):
     
 
 # TODO:
-# 1. batch this out, call grep to find jobs that timed out...
+# 1. check for multiple instances with the same model and only use the last one...
 # fmt: off
 @cli.command( name="create-sleap-resume-batch")
 @click.option("--file-filter", "-f", default="slurm*.out", type=str)
 @click.option("--pattern", "-p", default="TIMEOUT", type=str)
 @click.option("-d", "--chk-dir", type=click.Path(), default=None, help="Directory to check")
-@click.option("--no-checkpoint", "-n", type=bool, is_flag=True, help="Skip adding base_checkpoint option")
 @click.option("--update-lr", "-u", type=bool, is_flag=True, help="Update json config with latest learning rate")
-def create_sleap_resume_batch(file_filter, pattern, chk_dir, no_checkpoint, update_lr):
+def create_sleap_resume_batch(file_filter, pattern, chk_dir, update_lr):
     import os
     import glob
     import re
@@ -266,19 +265,27 @@ def create_sleap_resume_batch(file_filter, pattern, chk_dir, no_checkpoint, upda
         chk_dir = os.getcwd()
 
     proc_files = sorted(glob.glob(os.path.join(chk_dir, "**", file_filter), recursive=True))
-    batch_files = []
+    batch_files = {}
 
     for _file in proc_files:
+        to_add = False
+        key = None
         with open(_file, "r") as f:
-            lines = f.readlines()
+            lines = f.read().splitlines()
             for _line in lines:
+                # maybe get the model or directory...or some identifier here?
                 if pattern in _line:
-                    batch_files.append(pattern)
-                    break
-
-    for _file in batch_files:
-        job_id = int(re.search(r".*\-([0-9]+)\.out$", _file).group(1))
-        _create_sleap_resume_cmd(job_id, no_checkpoint, update_lr)
+                    to_add = True
+                if '"filename": ' in _line:
+                    key = _line.split(": ")[1][1:-1] # removes double quotes at start/stop
+            if to_add and (key is not None):
+                batch_files[key] = _file
+    for _file in batch_files.values():
+        try:
+            job_id = int(re.search(r".*\-([0-9]+)\.out$", _file).group(1))
+            _create_sleap_resume_cmd(job_id, update_lr)
+        except AttributeError as e:
+            pass
 
 
 
