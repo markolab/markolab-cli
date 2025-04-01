@@ -216,14 +216,22 @@ def _create_sleap_resume_cmd(job_id, update_lr):
     config_output = config["outputs"]
     run_name = config_output["run_name_prefix"] + config_output["run_name"] + config_output["run_name_suffix"]
     model_filename = os.path.join(config_output["runs_folder"], run_name)
+    if not os.path.exists(model_filename):
+        return None
 
     # strip out only the sbatch stuff...
     if "base_checkpoint" not in sbatch_script:
         new_sbatch_script = sbatch_script + f' --base_checkpoint "{model_filename}"'
     else:
         new_sbatch_script = sbatch_script
+
+    new_sbatch_script = new_sbatch_script.replace('"','\\\"')
+    cmd_output = subprocess.check_output(f"sacct --format=submitline%10000 --noheader -j {job_id}", shell=True)
+    submitline = cmd_output.decode().splitlines()[0].split("--wrap")[0].lstrip()
+    submitline = re.sub(r'--constraint=(\S+)',r'--constraint="\1"', submitline)
     
-    print(new_sbatch_script)
+    print(submitline + f'--wrap "{new_sbatch_script}"')
+    # print(new_sbatch_script)
     learning_rate = None
 
     logfile = f"slurm-{job_id}.out"
@@ -253,7 +261,7 @@ def _create_sleap_resume_cmd(job_id, update_lr):
 # fmt: off
 @cli.command( name="create-sleap-resume-batch")
 @click.option("--file-filter", "-f", default="slurm*.out", type=str)
-@click.option("--pattern", "-p", default="TIMEOUT", type=str)
+@click.option("--pattern", "-p", default="slurmstepd", type=str)
 @click.option("-d", "--chk-dir", type=click.Path(), default=None, help="Directory to check")
 @click.option("--update-lr", "-u", type=bool, is_flag=True, help="Update json config with latest learning rate")
 def create_sleap_resume_batch(file_filter, pattern, chk_dir, update_lr):
@@ -280,6 +288,8 @@ def create_sleap_resume_batch(file_filter, pattern, chk_dir, update_lr):
                     key = _line.split(": ")[1][1:-1] # removes double quotes at start/stop
             if to_add and (key is not None):
                 batch_files[key] = _file
+            elif (not to_add) and (key in batch_files.keys()):
+                del batch_files[key] # remove the entry if a later run was successful (or is in progress)
     for _file in batch_files.values():
         try:
             job_id = int(re.search(r".*\-([0-9]+)\.out$", _file).group(1))
