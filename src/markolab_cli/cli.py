@@ -195,7 +195,7 @@ def create_slurm_cli(command, ncpus, memory, wall_time, qos, prefix, suffix, acc
 @click.argument("job_id", type=int)
 @click.option("--no-checkpoint", "-n", type=bool, is_flag=True, help="Skip adding base_checkpoint option")
 @click.option("--update-lr", "-u", type=bool, is_flag=True, help="Update json config with latest learning rate")
-def create_sleap_resume_cmd(job_id, update_lr):
+def create_sleap_resume_cmd(job_id, no_checkpoint, update_lr):
     return _create_sleap_resume_cmd(job_id, no_checkpoint, update_lr)
 
 
