@@ -95,10 +95,11 @@ def convert_dat_to_avi_cli_batch(chk_dir, file_filter, chunk_size, delete, threa
 @click.option("-d", "--chk-dir", type=click.Path(), default=None, help="Directory to check")
 @click.option("-f", "--file-filter", type=str, default="*.dat", help="File filter", show_envvar=True )
 @click.option( "--is-dir", is_flag=True )
+@click.option("-r", "--recursive", is_flag=True)
 # fmt: on
 @slurm_params
 def create_slurm_batch_cli(
-    command, chk_dir, file_filter, is_dir, ncpus, memory, wall_time, qos, prefix, suffix, account, ngpus, gpu_type, constraint
+    command, chk_dir, file_filter, is_dir, ncpus, memory, wall_time, qos, prefix, suffix, account, ngpus, gpu_type, constraint, recursive
 ):
     import os
     import glob
@@ -106,7 +107,7 @@ def create_slurm_batch_cli(
     if chk_dir is None:
         chk_dir = os.getcwd()
 
-    files_proc = sorted(glob.glob(os.path.join(chk_dir, "**", file_filter), recursive=True))
+    files_proc = sorted(glob.glob(os.path.join(chk_dir, "**", file_filter), recursive=recursive))
 
     if is_dir:
         files_proc = filter(os.path.isdir, files_proc)
