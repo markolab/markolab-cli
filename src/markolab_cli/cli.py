@@ -107,7 +107,10 @@ def create_slurm_batch_cli(
     if chk_dir is None:
         chk_dir = os.getcwd()
 
-    files_proc = sorted(glob.glob(os.path.join(chk_dir, "**", file_filter), recursive=recursive))
+    if recursive:
+        files_proc = sorted(glob.glob(os.path.join(chk_dir, "**", file_filter), recursive=recursive))
+    else:
+        files_proc = sorted(glob.glob(os.path.join(chk_dir, file_filter), recursive=recursive))
 
     if is_dir:
         files_proc = filter(os.path.isdir, files_proc)
