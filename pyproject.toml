@@ -10,7 +10,7 @@ description = "Markolab command line utilities"
 dependencies = [
 	"click",
 	"tqdm",
-	"markovids@git+https://github.com/markolab/markovids.git"
+	"markovids@git+https://github.com/markolab/markovids.git@integrate_tr_changes"
 ]
 
 [project.scripts]
