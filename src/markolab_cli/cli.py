@@ -93,13 +93,14 @@ def convert_dat_to_avi_cli_batch(chk_dir, file_filter, chunk_size, delete, threa
 @cli.command( name="create-slurm-batch", context_settings={"show_default": True, "auto_envvar_prefix": "MARKOLABCLI_BATCH"}, )
 @click.argument("command", type=str)
 @click.option("-d", "--chk-dir", type=click.Path(), default=None, help="Directory to check")
+@click.option("--blocking-subdir", type=str, default=None, help="If this subdirectory is present, do not process")
 @click.option("-f", "--file-filter", type=str, default="*.dat", help="File filter", show_envvar=True )
 @click.option( "--is-dir", is_flag=True )
 @click.option("-r", "--recursive", is_flag=True)
 # fmt: on
 @slurm_params
 def create_slurm_batch_cli(
-    command, chk_dir, file_filter, is_dir, ncpus, memory, wall_time, qos, prefix, suffix, account, ngpus, gpu_type, constraint, recursive
+    command, chk_dir, blocking_subdir, file_filter, is_dir, ncpus, memory, wall_time, qos, prefix, suffix, account, ngpus, gpu_type, constraint, recursive
 ):
     import os
     import glob
@@ -114,6 +115,9 @@ def create_slurm_batch_cli(
 
     if is_dir:
         files_proc = filter(os.path.isdir, files_proc)
+    
+    if (blocking_subdir is not None) and is_dir:
+        files_proc = filter(lambda x: not os.path.exists(os.path.join(x, blocking_subdir)), files_proc)
 
     if prefix is not None:
         base_command = f"{prefix};"
